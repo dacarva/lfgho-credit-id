@@ -1,13 +1,21 @@
-import { ConnectKitButton } from "connectkit";
+import { ConnectKitProvider } from "connectkit";
+import Navbar from "./components/NavBar";
+import TokenSender from "./components/TokenSender";
 
 function App() {
   return (
     <div>
-      <h1 className="text-3xl text-center font-bold underline">Hello world!</h1>
-
-      <div className="flex items-center justify-center h-screen">
-        <ConnectKitButton />
-      </div>
+      <ConnectKitProvider>
+        <div className="fixed top-0 left-0 right-0">
+          <Navbar />
+        </div>
+        <div className="mt-[100px]">
+          <h1 className="text-3xl text-center font-bold underline">
+            Account Abstraction test
+          </h1>
+          <TokenSender />
+        </div>
+      </ConnectKitProvider>
     </div>
   );
 }
