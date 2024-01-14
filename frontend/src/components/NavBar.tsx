@@ -1,4 +1,4 @@
-import { ConnectKitButton } from "connectkit";
+import SmartAccountButton from "./SmartAccountButton";
 
 const Navbar = () => {
   return (
@@ -10,7 +10,7 @@ const Navbar = () => {
           </a>
         </li>
         <li className="ml-auto">
-          <ConnectKitButton />
+          <SmartAccountButton />
         </li>
       </ul>
     </nav>

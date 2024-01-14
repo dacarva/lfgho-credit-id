@@ -1,9 +1,9 @@
 import React, { useState, useContext } from "react";
 import { BiconomySmartAccountV2 } from "@biconomy/account";
 import { PaymasterMode } from "@biconomy/paymaster";
-
 import { erc20ABI } from "wagmi";
 import { Address, encodeFunctionData, parseUnits } from "viem";
+import toast from "react-hot-toast";
 
 import { tokens, SPONSOR_FEE } from "@/constants";
 import { SmartWalletContext } from "@/context/smart-wallet";
@@ -55,8 +55,10 @@ const buildUserOp = async (
       "Transaction Hash:",
       transactionDetails.receipt.transactionHash
     );
+    return transactionDetails;
   } catch (error) {
     console.error(error);
+    throw error;
   }
 };
 
@@ -78,13 +80,27 @@ const TokenSender = () => {
 
   const handleSendTokens = async () => {
     try {
-      if (smartAccount) {
-        await buildUserOp(
+      if (!smartAccount) {
+        toast.error("Smart account not found");
+        return;
+      }
+
+      toast.promise(
+        buildUserOp(
           smartAccount as BiconomySmartAccountV2,
           destinationAddress as `0x${string}`,
           amount
-        );
-      }
+        ),
+        {
+          loading: "Sending tokens...",
+          success: (data) => {
+            // Format the success message using data (transactionDetails)
+            const successMessage = `Tokens sent! Transaction Hash: ${data.receipt.transactionHash}`;
+            return successMessage;
+          },
+          error: "Failed to send tokens",
+        }
+      );
     } catch (error) {
       console.error(error);
     }
