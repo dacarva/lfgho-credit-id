@@ -1,11 +1,15 @@
+import "./App.css";
+import { WagmiConfig } from "wagmi";
 import { ConnectKitProvider } from "connectkit";
+import { wagmiConfig } from "./config";
 import Navbar from "./components/NavBar";
 import TokenSender from "./components/TokenSender";
 
 function App() {
   return (
-    <div>
+    <WagmiConfig config={wagmiConfig}>
       <ConnectKitProvider>
+        <>
         <div className="fixed top-0 left-0 right-0">
           <Navbar />
         </div>
@@ -15,8 +19,9 @@ function App() {
           </h1>
           <TokenSender />
         </div>
+        </>
       </ConnectKitProvider>
-    </div>
+    </WagmiConfig>
   );
 }
 
