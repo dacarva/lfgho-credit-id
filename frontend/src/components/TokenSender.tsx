@@ -2,12 +2,12 @@ import React, { useState, useContext, useEffect } from "react";
 import { BiconomySmartAccountV2 } from "@biconomy/account";
 import { PaymasterMode } from "@biconomy/paymaster";
 import { erc20ABI } from "wagmi";
-import { readContract } from "@wagmi/core";
 import { Address, encodeFunctionData, parseUnits } from "viem";
 import toast from "react-hot-toast";
 
 import { tokens, SPONSOR_FEE } from "@/constants";
 import { SmartWalletContext } from "@/context/smart-wallet";
+import { getTokenBalance } from "@/services";
 
 const buildUserOp = async (
   smartAccount: BiconomySmartAccountV2,
@@ -71,21 +71,27 @@ const TokenSender = () => {
   const [tokenBalance, setTokenBalance] = useState("");
 
   useEffect(() => {
-    const getTokenBalance = async () => {
-      if (!smartAccount || !smartAccountAddress)
-        throw new Error("Smart account not found");
-      const data = await readContract({
-        address: tokens[smartAccount.chainId as keyof typeof tokens]
-          .USDC as Address,
-        abi: erc20ABI,
-        functionName: "balanceOf",
-        args: [smartAccountAddress],
-      });
-      setTokenBalance((Number(data) / 10 ** 6).toString());
+    if (!smartAccount || !smartAccountAddress) return;
+
+    const fetchTokenBalance = async () => {
+      try {
+        const tokenBalance = await getTokenBalance(
+          tokens[smartAccount.chainId as keyof typeof tokens].USDC as Address,
+          smartAccountAddress as Address
+        );
+        setTokenBalance((Number(tokenBalance) / 10 ** 6).toString());
+      } catch (error) {
+        console.error("Failed to fetch token balance:", error);
+        // Optionally, handle error here
+      }
     };
 
-    if (!smartAccountAddress) return;
-    getTokenBalance();
+    // Fetch the token balance immediately, then set up the interval
+    fetchTokenBalance();
+    const intervalId = setInterval(fetchTokenBalance, 3000);
+
+    // Clear the interval when the component unmounts
+    return () => clearInterval(intervalId);
   }, [smartAccountAddress, smartAccount]);
 
   const handleDestinationAddressChange = (
