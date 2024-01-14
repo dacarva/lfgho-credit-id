@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { BiconomySmartAccountV2 } from "@biconomy/account";
 import { PaymasterMode } from "@biconomy/paymaster";
 import { erc20ABI } from "wagmi";
+import { fetchToken } from "@wagmi/core";
 import { Address, encodeFunctionData, parseUnits } from "viem";
 import toast from "react-hot-toast";
 
@@ -75,11 +76,17 @@ const TokenSender = () => {
 
     const fetchTokenBalance = async () => {
       try {
+        const tokenAddress = tokens[smartAccount.chainId as keyof typeof tokens]
+          .USDC as Address;
+        //TODO: set the default token from USDC
         const tokenBalance = await getTokenBalance(
-          tokens[smartAccount.chainId as keyof typeof tokens].USDC as Address,
+          tokenAddress,
           smartAccountAddress as Address
         );
-        setTokenBalance((Number(tokenBalance) / 10 ** 6).toString());
+        const token = await fetchToken({ address: tokenAddress });
+        setTokenBalance(
+          (Number(tokenBalance) / 10 ** token.decimals).toString()
+        );
       } catch (error) {
         console.error("Failed to fetch token balance:", error);
         // Optionally, handle error here

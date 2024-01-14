@@ -2,6 +2,10 @@ export const tokens = {
   80001: {
     USDC: "0xF649d59A350D96bEEEe61588742896C89d693854",
   },
+  11155111: {
+    GHO: "0xc4bF5CbDaBE595361438F8c6a187bDc330539c60",
+    USDC: "0xc4bF5CbDaBE595361438F8c6a187bDc330539c60", // TODO: UPDATE
+  },
 };
 
 export const SPONSOR_FEE = "0.1";
