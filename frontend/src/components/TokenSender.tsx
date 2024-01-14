@@ -1,7 +1,8 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { BiconomySmartAccountV2 } from "@biconomy/account";
 import { PaymasterMode } from "@biconomy/paymaster";
 import { erc20ABI } from "wagmi";
+import { readContract } from "@wagmi/core";
 import { Address, encodeFunctionData, parseUnits } from "viem";
 import toast from "react-hot-toast";
 
@@ -63,10 +64,29 @@ const buildUserOp = async (
 };
 
 const TokenSender = () => {
+  const { smartAccount, smartAccountAddress } = useContext(SmartWalletContext);
+
   const [destinationAddress, setDestinationAddress] = useState("");
   const [amount, setAmount] = useState("");
+  const [tokenBalance, setTokenBalance] = useState("");
 
-  const { smartAccount, smartAccountAddress } = useContext(SmartWalletContext);
+  useEffect(() => {
+    const getTokenBalance = async () => {
+      if (!smartAccount || !smartAccountAddress)
+        throw new Error("Smart account not found");
+      const data = await readContract({
+        address: tokens[smartAccount.chainId as keyof typeof tokens]
+          .USDC as Address,
+        abi: erc20ABI,
+        functionName: "balanceOf",
+        args: [smartAccountAddress],
+      });
+      setTokenBalance((Number(data) / 10 ** 6).toString());
+    };
+
+    if (!smartAccountAddress) return;
+    getTokenBalance();
+  }, [smartAccountAddress, smartAccount]);
 
   const handleDestinationAddressChange = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -117,6 +137,7 @@ const TokenSender = () => {
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Token Sender</h1>
       <p className="mb-4">Smart Wallet Address: {smartAccountAddress}</p>
+      <p className="mb-4">User USDC Token Balance: {tokenBalance}</p>
       <form>
         <div className="mb-4">
           <label htmlFor="destinationAddress" className="block mb-2">
