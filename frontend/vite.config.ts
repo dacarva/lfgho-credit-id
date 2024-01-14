@@ -20,6 +20,7 @@ export default defineConfig({
     alias: {
       stream: "stream-browserify",
       util: "util",
+      "@": "/src",
     },
   },
 });

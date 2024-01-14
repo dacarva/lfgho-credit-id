@@ -1,50 +1,12 @@
-import React, { useState } from "react";
-import { ChainId } from "@biconomy/core-types";
-import { ethers } from "ethers";
-import { IBundler, Bundler } from "@biconomy/bundler";
-import {
-  BiconomySmartAccountV2,
-  DEFAULT_ENTRYPOINT_ADDRESS,
-} from "@biconomy/account";
-import {
-  IPaymaster,
-  BiconomyPaymaster,
-  PaymasterMode,
-} from "@biconomy/paymaster";
-import {
-  ECDSAOwnershipValidationModule,
-  DEFAULT_ECDSA_OWNERSHIP_MODULE,
-} from "@biconomy/modules";
+import React, { useState, useContext } from "react";
+import { BiconomySmartAccountV2 } from "@biconomy/account";
+import { PaymasterMode } from "@biconomy/paymaster";
 
-import { useWalletClient, erc20ABI } from "wagmi";
-import { WalletClient, encodeFunctionData, parseUnits } from "viem";
+import { erc20ABI } from "wagmi";
+import { encodeFunctionData, parseUnits } from "viem";
 
-import tokens from "../constants";
-
-const bundler: IBundler = new Bundler({
-  bundlerUrl:
-    "https://bundler.biconomy.io/api/v2/80001/nJPK7B3ru.dd7f7861-190d-41bd-af80-6877f74b8f44",
-  chainId: ChainId.POLYGON_MUMBAI,
-  entryPointAddress: DEFAULT_ENTRYPOINT_ADDRESS,
-});
-
-const paymaster: IPaymaster = new BiconomyPaymaster({
-  paymasterUrl: `https://paymaster.biconomy.io/api/v1/80001/${
-    import.meta.env.VITE_BICONOMY_API_KEY
-  }`,
-});
-
-const walletClientToSigner = (walletClient: WalletClient) => {
-  const { account, chain, transport } = walletClient;
-  const network = {
-    chainId: chain?.id || 1,
-    name: chain?.name || "mainnet",
-    ensAddress: chain?.contracts?.ensRegistry?.address || "",
-  };
-  const provider = new ethers.providers.Web3Provider(transport, network);
-  const signer = account ? provider.getSigner(account.address) : null;
-  return signer;
-};
+import tokens from "@/constants";
+import { SmartWalletContext } from "@/context/smart-wallet";
 
 const buildUserOp = async (smartAccount: BiconomySmartAccountV2) => {
   const receiver = import.meta.env.VITE_RECEIVER_WALLET;
@@ -75,8 +37,8 @@ const buildUserOp = async (smartAccount: BiconomySmartAccountV2) => {
 const TokenSender = () => {
   const [destinationAddress, setDestinationAddress] = useState("");
   const [amount, setAmount] = useState("");
-  const [smartWalletAddress, setSmartWalletAddress] = useState("");
-  const { data: walletClient } = useWalletClient();
+
+  const { smartAccount, smartAccountAddress } = useContext(SmartWalletContext);
 
   const handleDestinationAddressChange = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -100,36 +62,20 @@ const TokenSender = () => {
   const handleConnectSmartWallet = async () => {
     console.log("Connect Smart Wallet");
     try {
-      const signer = walletClient ? walletClientToSigner(walletClient) : null;
-
-      if (signer) {
-        const module = await ECDSAOwnershipValidationModule.create({
-          signer,
-          moduleAddress: DEFAULT_ECDSA_OWNERSHIP_MODULE,
-        });
-
-        const biconomySmartAccount = await BiconomySmartAccountV2.create({
-          chainId: ChainId.POLYGON_MUMBAI,
-          bundler,
-          paymaster,
-          entryPointAddress: DEFAULT_ENTRYPOINT_ADDRESS,
-          defaultValidationModule: module,
-          activeValidationModule: module,
-        });
-
-        const address = await biconomySmartAccount.getAccountAddress();
-        setSmartWalletAddress(address);
-        await buildUserOp(biconomySmartAccount);
+      if (smartAccount) {
+        await buildUserOp(smartAccount as BiconomySmartAccountV2);
       }
     } catch (error) {
       console.error(error);
     }
   };
 
+  if (!smartAccountAddress) return <div>No smart wallet connected</div>;
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Token Sender</h1>
-      <p className="mb-4">Smart Wallet Address: {smartWalletAddress}</p>
+      <p className="mb-4">Smart Wallet Address: {smartAccountAddress}</p>
       <form>
         <div className="mb-4">
           <label htmlFor="destinationAddress" className="block mb-2">
