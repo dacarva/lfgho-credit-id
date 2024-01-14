@@ -3,23 +3,49 @@ import { BiconomySmartAccountV2 } from "@biconomy/account";
 import { PaymasterMode } from "@biconomy/paymaster";
 
 import { erc20ABI } from "wagmi";
-import { encodeFunctionData, parseUnits } from "viem";
+import { Address, encodeFunctionData, parseUnits } from "viem";
 
-import tokens from "@/constants";
+import { tokens, SPONSOR_FEE } from "@/constants";
 import { SmartWalletContext } from "@/context/smart-wallet";
 
-const buildUserOp = async (smartAccount: BiconomySmartAccountV2) => {
-  const receiver = import.meta.env.VITE_RECEIVER_WALLET;
+const buildUserOp = async (
+  smartAccount: BiconomySmartAccountV2,
+  destinationAddress: Address,
+  amount: string
+) => {
   try {
     const functionData = encodeFunctionData({
       abi: erc20ABI,
       functionName: "transfer",
-      args: [receiver, parseUnits("10", 6)],
+      args: [
+        destinationAddress || import.meta.env.VITE_RECEIVER_WALLET,
+        parseUnits(amount, 6),
+      ],
     });
-    const transaction = { to: tokens[80001].USDC, data: functionData };
-    const userOp = await smartAccount.buildUserOp([transaction], {
-      paymasterServiceData: { mode: PaymasterMode.SPONSORED },
+
+    if (!smartAccount.chainId) throw new Error("Chain ID not found");
+    const transaction = {
+      to: tokens[smartAccount.chainId as keyof typeof tokens].USDC,
+      data: functionData,
+    };
+
+    const repayToSponsorTxData = encodeFunctionData({
+      abi: erc20ABI,
+      functionName: "transfer",
+      args: [import.meta.env.VITE_SPONSOR_WALLET, parseUnits(SPONSOR_FEE, 6)],
     });
+
+    const repayToSponsorTx = {
+      to: tokens[smartAccount.chainId as keyof typeof tokens].USDC,
+      data: repayToSponsorTxData,
+    };
+
+    const userOp = await smartAccount.buildUserOp(
+      [transaction, repayToSponsorTx],
+      {
+        paymasterServiceData: { mode: PaymasterMode.SPONSORED },
+      }
+    );
     const userOpResponse = await smartAccount.sendUserOp(userOp);
 
     const transactionDetails = await userOpResponse.wait();
@@ -50,24 +76,23 @@ const TokenSender = () => {
     setAmount(e.target.value);
   };
 
-  const handleSendTokens = () => {
-    // Logic to send tokens
+  const handleSendTokens = async () => {
+    try {
+      if (smartAccount) {
+        await buildUserOp(
+          smartAccount as BiconomySmartAccountV2,
+          destinationAddress as `0x${string}`,
+          amount
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleConsoleLogData = () => {
     console.log("Destination Address:", destinationAddress);
     console.log("Amount:", amount);
-  };
-
-  const handleConnectSmartWallet = async () => {
-    console.log("Connect Smart Wallet");
-    try {
-      if (smartAccount) {
-        await buildUserOp(smartAccount as BiconomySmartAccountV2);
-      }
-    } catch (error) {
-      console.error(error);
-    }
   };
 
   if (!smartAccountAddress) return <div>No smart wallet connected</div>;
@@ -114,13 +139,6 @@ const TokenSender = () => {
           className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
         >
           Console Log Data
-        </button>
-        <button
-          type="button"
-          onClick={handleConnectSmartWallet}
-          className="bg-green-500 text-white px-4 py-2 rounded"
-        >
-          Test Account Abstraction
         </button>
       </form>
     </div>
