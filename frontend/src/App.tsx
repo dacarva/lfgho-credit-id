@@ -1,10 +1,10 @@
 import "./App.css";
 import { WagmiConfig } from "wagmi";
 import { ConnectKitProvider } from "connectkit";
-import { SmartWalletProvider } from "./context/smart-wallet";
-import { wagmiConfig } from "./config";
+import { SmartWalletProvider } from "@/context/smart-wallet";
+import { wagmiConfig } from "@/config";
 import { Toaster } from "react-hot-toast";
-import Navbar from "./components/NavBar";
+import Navbar from "@/components/NavBar";
 import { Outlet } from "react-router-dom";
 
 function App() {

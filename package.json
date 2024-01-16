@@ -1,4 +1,9 @@
 {
   "private": true,
-  "workspaces": ["frontend", "backend", "contracts"]
+  "workspaces": [
+    "frontend",
+    "backend",
+    "contracts"
+  ],
+  "packageManager": "yarn@4.0.2"
 }
