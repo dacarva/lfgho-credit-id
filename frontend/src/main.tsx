@@ -4,6 +4,7 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import App from "./App";
 import PolygonId from "./views/PolygonId";
 import TokenSender from "./components/TokenSender";
+import Home from "./views/Home";
 
 import "./index.css";
 const router = createBrowserRouter([
@@ -11,6 +12,11 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
+      {
+        path: "/",
+        element: <Home />,
+      },
+
       {
         path: "/polygon-verifier",
         element: <PolygonId />,

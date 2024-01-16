@@ -18,7 +18,7 @@ function App() {
               <div className="fixed top-0 left-0 right-0">
                 <Navbar />
               </div>
-              <div className="mt-10">
+              <div className="mt-20">
                 <Outlet />
               </div>
             </>
