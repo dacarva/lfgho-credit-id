@@ -5,6 +5,7 @@ import App from "./App";
 import PolygonId from "./views/PolygonId";
 import TokenSender from "./components/TokenSender";
 import Home from "./views/Home";
+import Delegator from "./views/Delegator";
 
 import "./index.css";
 const router = createBrowserRouter([
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
       {
         path: "/token-sender",
         element: <TokenSender />,
+      },
+      {
+        path: "/delegator",
+        element: <Delegator />,
       },
     ],
   },

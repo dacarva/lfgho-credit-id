@@ -20,6 +20,11 @@ const Navbar = () => {
             Token-sender
           </Link>
         </li>
+        <li className="mr-6">
+          <Link to="/delegator" className="text-white">
+            Delegator
+          </Link>
+        </li>
         <li className="ml-auto">
           <SmartAccountButton />
         </li>
