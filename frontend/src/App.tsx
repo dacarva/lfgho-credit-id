@@ -19,7 +19,7 @@ function App() {
               <div className="fixed top-0 left-0 right-0 z-10">
                 <Navbar />
               </div>
-              <div className="mt-20">
+              <div className="mt-[140px]">
                 <Outlet />
               </div>
             </>
