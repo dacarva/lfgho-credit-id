@@ -5,10 +5,6 @@ import { Hex } from "viem";
 
 import PoolABI from "@/assets/abis/Pool.json";
 import VariableDebtTokenABI from "@/assets/abis/IVariableDebtToken.json";
-import { BiconomySmartAccountV2 } from "@biconomy/account";
-import { PaymasterMode } from "@biconomy/paymaster";
-import { UserOpReceipt } from "@biconomy/bundler";
-
 import { AlchemyProvider } from "@alchemy/aa-alchemy";
 
 export const encodeApproval = async (
