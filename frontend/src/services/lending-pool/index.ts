@@ -1,4 +1,4 @@
-import { Address, isAddress, encodeFunctionData, parseUnits } from "viem";
+import { Address, isAddress, encodeFunctionData, parseUnits, Hash } from "viem";
 import { erc20ABI } from "wagmi";
 import { fetchToken } from "@wagmi/core";
 import { Hex } from "viem";
@@ -8,6 +8,8 @@ import VariableDebtTokenABI from "@/assets/abis/IVariableDebtToken.json";
 import { BiconomySmartAccountV2 } from "@biconomy/account";
 import { PaymasterMode } from "@biconomy/paymaster";
 import { UserOpReceipt } from "@biconomy/bundler";
+
+import { AlchemyProvider } from "@alchemy/aa-alchemy";
 
 export const encodeApproval = async (
   lendingPool: Address,
@@ -36,12 +38,12 @@ export const encodeApproval = async (
 };
 
 export const deposit = async (
-  smartAccount: BiconomySmartAccountV2,
+  smartAccount: AlchemyProvider,
   lendingPool: Address,
   asset: Address,
   amount: string
-): Promise<UserOpReceipt> => {
-  const smartAccountAddress = await smartAccount.getAccountAddress();
+): Promise<Hash> => {
+  const smartAccountAddress = await smartAccount.getAddress();
   if (!smartAccountAddress) throw new Error("Wallet not connected");
   if (
     !isAddress(smartAccountAddress) ||
@@ -62,9 +64,8 @@ export const deposit = async (
     });
 
     const approvalTransaction = {
-      to: asset,
+      target: asset,
       data: approvalFunctionData,
-      value: 0,
     };
 
     // 2. Encode the deposit function data
@@ -75,22 +76,17 @@ export const deposit = async (
     });
 
     const depositTransaction = {
-      to: lendingPool,
+      target: lendingPool,
       data: depositFunctionData,
-      value: 0,
     };
     // 3. Bundle the two function data together
-    const userOp = await smartAccount.buildUserOp(
-      [approvalTransaction, depositTransaction],
-      {
-        paymasterServiceData: { mode: PaymasterMode.SPONSORED },
-      }
-    );
-
-    // 4. Send the transaction
-    const userOpResponse = await smartAccount.sendUserOp(userOp);
-    const transactionDetails = await userOpResponse.wait();
-    return transactionDetails;
+    const uo = await smartAccount.sendUserOperation([
+      approvalTransaction,
+      depositTransaction,
+    ]);
+    const txHash = await smartAccount.waitForUserOperationTransaction(uo.hash);
+    console.log("🚀 ~ handleClick ~ txHash:", txHash);
+    return txHash;
   } catch (error) {
     console.error(error);
     throw Error("Error occurred during deposit");
@@ -98,13 +94,13 @@ export const deposit = async (
 };
 
 export const delegateCollateral = async (
-  smartAccount: BiconomySmartAccountV2,
+  smartAccount: AlchemyProvider,
   lendingPool: Address,
   debtToken: Address,
   delegatee: Address,
   amount: string
-): Promise<UserOpReceipt> => {
-  const smartAccountAddress = await smartAccount.getAccountAddress();
+): Promise<Hash> => {
+  const smartAccountAddress = await smartAccount.getAddress();
   if (!smartAccountAddress) throw new Error("Wallet not connected");
   if (
     !isAddress(smartAccountAddress) ||
@@ -125,23 +121,15 @@ export const delegateCollateral = async (
     });
 
     const approveDelegationTransaction = {
-      to: debtToken,
+      target: debtToken,
       data: approveDelegationData,
-      value: 0,
     };
-
-    // 2. Bundle the two function data together
-    const userOp = await smartAccount.buildUserOp(
-      [approveDelegationTransaction],
-      {
-        paymasterServiceData: { mode: PaymasterMode.SPONSORED },
-      }
+    // 3. Bundle the two function data together
+    const uo = await smartAccount.sendUserOperation(
+      approveDelegationTransaction
     );
-
-    // 3. Send the transaction
-    const userOpResponse = await smartAccount.sendUserOp(userOp);
-    const transactionDetails = await userOpResponse.wait();
-    return transactionDetails;
+    const txHash = await smartAccount.waitForUserOperationTransaction(uo.hash);
+    return txHash;
   } catch (error) {
     console.error(error);
     throw Error("Error occurred during delegate collateral");
@@ -149,13 +137,13 @@ export const delegateCollateral = async (
 };
 
 export const borrow = async (
-  smartAccount: BiconomySmartAccountV2,
+  smartAccount: AlchemyProvider,
   lendingPool: Address,
   asset: Address,
   amount: string,
   delegator?: Address
-): Promise<UserOpReceipt> => {
-  const smartAccountAddress = await smartAccount.getAccountAddress();
+): Promise<Hash> => {
+  const smartAccountAddress = await smartAccount.getAddress();
   if (!smartAccountAddress) throw new Error("Wallet not connected");
   if (
     !isAddress(smartAccountAddress) ||
@@ -182,20 +170,14 @@ export const borrow = async (
     });
 
     const borrowTransaction = {
-      to: lendingPool,
+      target: lendingPool,
       data: borrowFunctionData,
-      value: 0,
     };
 
-    // 2. Bundle the two function data together
-    const userOp = await smartAccount.buildUserOp([borrowTransaction], {
-      paymasterServiceData: { mode: PaymasterMode.SPONSORED },
-    });
-
-    // 3. Send the transaction
-    const userOpResponse = await smartAccount.sendUserOp(userOp);
-    const transactionDetails = await userOpResponse.wait();
-    return transactionDetails;
+    // 3. Bundle the two function data together
+    const uo = await smartAccount.sendUserOperation(borrowTransaction);
+    const txHash = await smartAccount.waitForUserOperationTransaction(uo.hash);
+    return txHash;
   } catch (error) {
     console.error(error);
     throw Error("Error occurred during borrow");

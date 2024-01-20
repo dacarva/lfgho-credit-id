@@ -78,6 +78,9 @@ export const SmartWalletProvider = ({ children }: { children: ReactNode }) => {
         });
 
         const address = await provider.getAddress();
+        provider.withAlchemyGasManager({
+          policyId: import.meta.env.VITE_ALCHEMY_GAS_MANAGER_POLICY_ID,
+        });
         console.log("🚀 ~ connectSmartWal ~ address:", address);
         setSmartAccountAddress(address as Address | null);
         setSmartAccount(provider);
