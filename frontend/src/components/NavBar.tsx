@@ -7,7 +7,9 @@ const Navbar = () => {
       <ul className="flex justify-between items-center h-16 mx-5">
         <li className="mr-6">
           <Link to="/" className="text-white">
-            Home
+            <h2 className="m-0 relative text-inherit leading-[32px] font-medium font-inherit whitespace-nowrap">
+              Logotype
+            </h2>
           </Link>
         </li>
         <li className="mr-6">

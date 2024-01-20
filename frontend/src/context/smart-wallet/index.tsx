@@ -46,6 +46,7 @@ export const SmartWalletProvider = ({ children }: { children: ReactNode }) => {
   const { isConnected, isDisconnected } = useAccount();
 
   useEffect(() => {
+    console.log("COntext call");
     const connectSmartWallet = async (walletClient: WalletClient) => {
       if (!walletClient) throw new Error("Wallet client not found");
       const signer: SmartAccountSigner = new WalletClientSigner(

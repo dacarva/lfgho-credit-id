@@ -7,6 +7,10 @@ import TokenSender from "./components/TokenSender";
 import Home from "./views/Home";
 import Delegator from "./views/Delegator";
 import AlchemyAA from "./views/AlchemyAA";
+import ContractSignView from "./views/ContractSignView";
+import BeneficiaryView from "./views/BeneficiaryView";
+import ApprovalStatusSucceed from "./views/ApprovalStatusSucceed";
+import ApprovalStatusFail from "./views/ApprovalStatusFail";
 
 import "./index.css";
 const router = createBrowserRouter([
@@ -17,6 +21,30 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <Home />,
+      },
+      {
+        path: "/delegator",
+        element: <Delegator />,
+      },
+      {
+        path: "/contract-sign",
+        element: <ContractSignView />,
+      },
+      {
+        path: "/beneficiary",
+        element: <BeneficiaryView />,
+      },
+      {
+        path: "/approval-status-succeed",
+        element: <ApprovalStatusSucceed />,
+      },
+      {
+        path: "/approval-status-fail",
+        element: <ApprovalStatusFail />,
+      },
+      {
+        path: "/beneficiary",
+        element: <BeneficiaryView />,
       },
 
       {
@@ -30,10 +58,6 @@ const router = createBrowserRouter([
       {
         path: "/token-sender",
         element: <TokenSender />,
-      },
-      {
-        path: "/delegator",
-        element: <Delegator />,
       },
     ],
   },

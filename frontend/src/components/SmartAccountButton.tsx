@@ -16,7 +16,7 @@ export const SmartAccountButton = () => {
   };
 
   const formatAddress = (address: Address) => {
-    if (!address) return "";
+    if (!address) return "0x smart";
     const start = address.substring(0, 6);
     const end = address.substring(address.length - 4);
     return `${start}...${end}`;
@@ -28,11 +28,15 @@ export const SmartAccountButton = () => {
         <div className="flex items-center">
           <button
             onClick={show}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            className="cursor-pointer [border:none] py-0 px-6 bg-primary flex-[0.7425] rounded-31xl flex flex-row items-center justify-center"
           >
-            {isConnected
-              ? formatAddress(smartAccountAddress as Address)
-              : "Custom Connect"}
+            <div className="flex-1 flex flex-row items-center justify-start py-4 px-[13px] gap-[8px]">
+              <div className="relative text-xl tracking-[0.15px] leading-[28px] font-medium font-body-2 text-shades-white text-center whitespace-nowrap">
+                {isConnected
+                  ? formatAddress(smartAccountAddress as Address)
+                  : "Connect Wallet"}
+              </div>
+            </div>
           </button>
           {isConnected && (
             <button

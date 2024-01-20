@@ -1,4 +1,4 @@
-import DelegatorFrame from "@/components/DelegatorFrame";
+import DelegatorFrame from "@/components/CreditApplicationCard";
 
 const GivenCreditsContainer = () => {
   return (

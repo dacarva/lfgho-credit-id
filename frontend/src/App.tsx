@@ -4,7 +4,8 @@ import { ConnectKitProvider } from "connectkit";
 import { SmartWalletProvider } from "@/context/smart-wallet";
 import { wagmiConfig } from "@/config";
 import { Toaster } from "react-hot-toast";
-import Navbar from "@/components/NavBar";
+// import Navbar from "@/components/NavBar";
+import Navbar from "@/components/NavBarNew";
 import { Outlet } from "react-router-dom";
 
 function App() {
@@ -15,7 +16,7 @@ function App() {
           <SmartWalletProvider>
             <Toaster />
             <>
-              <div className="fixed top-0 left-0 right-0">
+              <div className="fixed top-0 left-0 right-0 z-10">
                 <Navbar />
               </div>
               <div className="mt-20">
