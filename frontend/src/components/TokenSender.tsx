@@ -3,12 +3,13 @@ import { BiconomySmartAccountV2 } from "@biconomy/account";
 import { PaymasterMode } from "@biconomy/paymaster";
 import { erc20ABI } from "wagmi";
 import { fetchToken } from "@wagmi/core";
-import { Address, encodeFunctionData, parseUnits } from "viem";
+import { Address, encodeFunctionData, isAddress, parseUnits } from "viem";
 import toast from "react-hot-toast";
 
-import { tokens, SPONSOR_FEE } from "@/constants";
+import { contracts, SPONSOR_FEE } from "@/constants";
 import { SmartWalletContext } from "@/context/smart-wallet";
 import { getTokenBalance } from "@/services";
+import { deposit, delegateCollateral, borrow } from "@/services/lending-pool";
 
 const buildUserOp = async (
   smartAccount: BiconomySmartAccountV2,
@@ -27,7 +28,7 @@ const buildUserOp = async (
 
     if (!smartAccount.chainId) throw new Error("Chain ID not found");
     const transaction = {
-      to: tokens[smartAccount.chainId as keyof typeof tokens].USDC,
+      to: contracts[smartAccount.chainId as keyof typeof contracts].USDC,
       data: functionData,
     };
 
@@ -38,7 +39,7 @@ const buildUserOp = async (
     });
 
     const repayToSponsorTx = {
-      to: tokens[smartAccount.chainId as keyof typeof tokens].USDC,
+      to: contracts[smartAccount.chainId as keyof typeof contracts].USDC,
       data: repayToSponsorTxData,
     };
 
@@ -77,8 +78,9 @@ const TokenSender = () => {
 
     const fetchTokenBalance = async () => {
       try {
-        const tokenAddress = tokens[smartAccount.chainId as keyof typeof tokens]
-          .USDC as Address;
+        const tokenAddress = contracts[
+          smartAccount.chainId as keyof typeof contracts
+        ].USDC as Address;
         //TODO: set the default token from USDC
         const tokenBalance = await getTokenBalance(
           tokenAddress,
@@ -140,6 +142,85 @@ const TokenSender = () => {
     }
   };
 
+  const handleDepositTokens = async () => {
+    console.log("Deposit tokens");
+
+    if (!smartAccount) throw new Error("Smart account not found");
+    try {
+      const depositReceipt = await deposit(
+        smartAccount,
+        contracts[smartAccount.chainId as keyof typeof contracts]
+          .LENDING_POOL as Address,
+        contracts[smartAccount.chainId as keyof typeof contracts]
+          .USDC as Address,
+        amount
+      );
+      console.log("🚀 ~ handleDepositTokens ~ depositReceipt:", depositReceipt);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleDelegateCredit = async () => {
+    console.log("Delegate credit");
+
+    if (!smartAccount) throw new Error("Smart account not found");
+
+    try {
+      const delegateCollateralReceipt = await delegateCollateral(
+        smartAccount,
+        contracts[smartAccount.chainId as keyof typeof contracts]
+          .LENDING_POOL as Address,
+        contracts[smartAccount.chainId as keyof typeof contracts]
+          .USDC_VARIABLE_DEBT as Address,
+        destinationAddress as Address,
+        amount
+      );
+      console.log(
+        "🚀 ~ handleDelegateCredit ~ delegateCollateralReceipt:",
+        delegateCollateralReceipt
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleBorrow = async () => {
+    if (!smartAccount) throw new Error("Smart account not found");
+
+    try {
+      const lendingPoolAddress = contracts[
+        smartAccount.chainId as keyof typeof contracts
+      ].LENDING_POOL as Address;
+      const usdcAddress = contracts[
+        smartAccount.chainId as keyof typeof contracts
+      ].USDC as Address;
+
+      let borrowReceipt;
+
+      if (destinationAddress !== "" && isAddress(destinationAddress)) {
+        borrowReceipt = await borrow(
+          smartAccount,
+          lendingPoolAddress,
+          usdcAddress,
+          amount,
+          destinationAddress
+        );
+      } else {
+        borrowReceipt = await borrow(
+          smartAccount,
+          lendingPoolAddress,
+          usdcAddress,
+          amount
+        );
+      }
+
+      console.log("🚀 ~ handleBorrow= ~ borrowReceipt:", borrowReceipt);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handleConsoleLogData = () => {
     console.log("Destination Address:", destinationAddress);
     console.log("Amount:", amount);
@@ -186,6 +267,27 @@ const TokenSender = () => {
         </button>
         <button
           type="button"
+          onClick={handleDepositTokens}
+          className="bg-red-500 text-white px-4 py-2 rounded mr-2"
+        >
+          Deposit in lending pool
+        </button>
+        <button
+          type="button"
+          onClick={handleDelegateCredit}
+          className="bg-green-500 text-white px-4 py-2 rounded mr-2"
+        >
+          Delegate credit
+        </button>
+        <button
+          type="button"
+          onClick={handleBorrow}
+          className="bg-purple-500 text-white px-4 py-2 rounded mr-2"
+        >
+          Borrow
+        </button>
+        <button
+          type="button"
           onClick={handleConsoleLogData}
           className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
         >
@@ -197,3 +299,7 @@ const TokenSender = () => {
 };
 
 export default TokenSender;
+
+// 0xE33CC6b56EF062F56c9bb4d732248712fCf7Cea7
+
+// DELEGATOR: 0xa529440F5Da6C056e59Df8b1989ff402BA94C505
