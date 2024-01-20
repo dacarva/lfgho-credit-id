@@ -1,6 +1,7 @@
 import { ReactNode, createContext, useEffect, useState } from "react";
 import { useWalletClient, useAccount } from "wagmi";
-import { WalletClient, Address, Chain } from "viem";
+import { WalletClient, Address } from "viem";
+import { sepolia, polygonMumbai } from "wagmi/chains";
 
 import {
   LightSmartContractAccount,
@@ -53,14 +54,16 @@ export const SmartWalletProvider = ({ children }: { children: ReactNode }) => {
         walletClient,
         "json-rpc" // signerType
       );
-      if (!signer) return;
+      if (!signer) throw new Error("Signer not found");
 
       const chainId = walletClient.chain?.id || 11155111;
+
+      const chain = chainId === 80001 ? polygonMumbai : sepolia;
 
       try {
         const provider = new AlchemyProvider({
           rpcUrl: getAlchemyURL(chainId),
-          chain: walletClient.chain,
+          chain,
           entryPointAddress: ENTRYPOINT_ADDRESS,
           opts: {
             txMaxRetries: 10,
@@ -71,10 +74,8 @@ export const SmartWalletProvider = ({ children }: { children: ReactNode }) => {
           return new LightSmartContractAccount({
             rpcClient,
             owner: signer,
-            chain: walletClient.chain,
-            factoryAddress: getDefaultLightAccountFactoryAddress(
-              walletClient.chain as Chain
-            ),
+            chain,
+            factoryAddress: getDefaultLightAccountFactoryAddress(chain),
           });
         });
 
