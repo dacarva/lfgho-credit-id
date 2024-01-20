@@ -16,6 +16,11 @@ const Navbar = () => {
           </Link>
         </li>
         <li className="mr-6">
+          <Link to="/alchemy-aa" className="text-white">
+            Alchemy AA
+          </Link>
+        </li>
+        <li className="mr-6">
           <Link to="/token-sender" className="text-white">
             Token-sender
           </Link>

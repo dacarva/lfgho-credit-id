@@ -6,6 +6,7 @@ import PolygonId from "./views/PolygonId";
 import TokenSender from "./components/TokenSender";
 import Home from "./views/Home";
 import Delegator from "./views/Delegator";
+import AlchemyAA from "./views/AlchemyAA";
 
 import "./index.css";
 const router = createBrowserRouter([
@@ -18,6 +19,10 @@ const router = createBrowserRouter([
         element: <Home />,
       },
 
+      {
+        path: "/alchemy-aa",
+        element: <AlchemyAA />,
+      },
       {
         path: "/polygon-verifier",
         element: <PolygonId />,

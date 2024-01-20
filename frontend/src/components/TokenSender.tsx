@@ -7,7 +7,7 @@ import { Address, encodeFunctionData, isAddress, parseUnits } from "viem";
 import toast from "react-hot-toast";
 
 import { contracts, SPONSOR_FEE } from "@/constants";
-import { SmartWalletContext } from "@/context/smart-wallet";
+import { SmartWalletContext } from "@/context/smart-wallet/biconomy";
 import { getTokenBalance } from "@/services";
 import { deposit, delegateCollateral, borrow } from "@/services/lending-pool";
 

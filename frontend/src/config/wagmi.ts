@@ -1,6 +1,6 @@
 import { createConfig } from "wagmi";
 import { getDefaultConfig } from "connectkit";
-import { polygon, polygonMumbai, sepolia, mainnet } from "wagmi/chains";
+import { sepolia } from "wagmi/chains";
 
 export const wagmiConfig = createConfig(
   getDefaultConfig({
@@ -10,7 +10,8 @@ export const wagmiConfig = createConfig(
 
     // Required
     appName: "LGHO Digital ID",
-    chains: [polygonMumbai, polygon, sepolia, mainnet],
+    // chains: [polygonMumbai, polygon, sepolia, mainnet],
+    chains: [sepolia],
 
     // Optional
     appDescription: "The only ID you will need",
