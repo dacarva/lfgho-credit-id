@@ -1,10 +1,18 @@
-import { Address, isAddress, encodeFunctionData, parseUnits, Hash } from "viem";
+import {
+  Address,
+  isAddress,
+  encodeFunctionData,
+  parseUnits,
+  parseEther,
+  Hash,
+} from "viem";
 import { erc20ABI } from "wagmi";
 import { fetchToken } from "@wagmi/core";
 import { Hex } from "viem";
 
 import PoolABI from "@/assets/abis/Pool.json";
 import VariableDebtTokenABI from "@/assets/abis/IVariableDebtToken.json";
+import WETHGatewayABI from "@/assets/abis/WETHGateway.json";
 import { AlchemyProvider } from "@alchemy/aa-alchemy";
 
 export const encodeApproval = async (
@@ -82,6 +90,43 @@ export const deposit = async (
     ]);
     const txHash = await smartAccount.waitForUserOperationTransaction(uo.hash);
     console.log("🚀 ~ handleClick ~ txHash:", txHash);
+    return txHash;
+  } catch (error) {
+    console.error(error);
+    throw Error("Error occurred during deposit");
+  }
+};
+
+export const depositETH = async (
+  smartAccount: AlchemyProvider,
+  WETHGateway: Address,
+  lendingPool: Address,
+  amount: string
+): Promise<Hash> => {
+  const smartAccountAddress = await smartAccount.getAddress();
+  if (!smartAccountAddress) throw new Error("Wallet not connected");
+  if (
+    !isAddress(smartAccountAddress) ||
+    !isAddress(lendingPool) ||
+    typeof amount !== "string"
+  )
+    throw new Error("Input parameters not correct");
+
+  try {
+    const depositFunctionData = encodeFunctionData({
+      abi: WETHGatewayABI.abi,
+      functionName: "depositETH",
+      args: [lendingPool, smartAccountAddress, 0],
+    });
+
+    const depositTransaction = {
+      target: WETHGateway,
+      data: depositFunctionData,
+      value: parseEther(amount),
+    };
+
+    const uo = await smartAccount.sendUserOperation(depositTransaction);
+    const txHash = await smartAccount.waitForUserOperationTransaction(uo.hash);
     return txHash;
   } catch (error) {
     console.error(error);
