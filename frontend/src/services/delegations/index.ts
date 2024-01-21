@@ -44,10 +44,11 @@ const mockDelegations: Delegation[] = [
 ];
 
 const mockContratSignatures: ContractSignature[] = [
+  // 0x0EB097a04512D4F4bD9CfA18D9F03B27173D0615 BENEFICIARY
   {
     contractId: "0x0EB097a04512D4F4bD9CfA18D9F03B27173D0615",
     delegatorAddress: "0xAa1933907E260AF2fAA23B2Bf65eE29C909045e3",
-    beneficiaryAddress: "0x0EB097a04512D4F4bD9CfA18D9F03B27173D0615",
+    beneficiaryAddress: "0xAa1933907E260AF2fAA23B2Bf65eE29C909045e3",
     creditAmount: 15,
     status: "signed",
     timestamp: Date.now(),
@@ -55,7 +56,7 @@ const mockContratSignatures: ContractSignature[] = [
   {
     contractId: "0x0EB097a04512D4F4bD9CfA18D9F03B27173D0615",
     delegatorAddress: "0xAa1933907E260AF2fAA23B2Bf65eE29C909045e3",
-    beneficiaryAddress: "0x0EB097a04512D4F4bD9CfA18D9F03B27173D0615",
+    beneficiaryAddress: "0xAa1933907E260AF2fAA23B2Bf65eE29C909045e3",
     creditAmount: 10,
     status: "signed",
     timestamp: Date.now(),
@@ -63,7 +64,7 @@ const mockContratSignatures: ContractSignature[] = [
   {
     contractId: "0x0EB097a04512D4F4bD9CfA18D9F03B27173D0615",
     delegatorAddress: "0xAa1933907E260AF2fAA23B2Bf65eE29C909045e3",
-    beneficiaryAddress: "0x0EB097a04512D4F4bD9CfA18D9F03B27173D0615",
+    beneficiaryAddress: "0xAa1933907E260AF2fAA23B2Bf65eE29C909045e3",
     creditAmount: 1,
     status: "signed",
     timestamp: Date.now(),

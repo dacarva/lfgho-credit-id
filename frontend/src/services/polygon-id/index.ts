@@ -31,10 +31,10 @@ export const verifyProof = async (requestId: string) => {
   const uri = `${POLYGON_ID_URL}/status`;
   try {
     const proofStatus = await axios.get(uri, {params: {id: requestId}})
-    console.log("🚀 ~ verifyProof ~ proofStatus:", proofStatus.status)
     return proofStatus
   } catch (error) {
-    console.error(error)
-    throw error
+    // console.error(error)
+    // throw error
+    return{ status: 400}
   }
 }
