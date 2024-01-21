@@ -1,0 +1,17 @@
+{
+  "circuitId": "credentialAtomicQuerySigV2",
+  "requestID": 1,
+  "to": null,
+  "query": {
+      "type": "CreditScoreWallet",
+      "allowedIssuers": [
+          "*"
+      ],
+      "context": "ipfs://QmUdaogvDoxnCcKVdDxcsEGmqGK4z6QGgmKGMthU154K1Q",
+      "credentialSubject": {
+          "creditScore": {
+              "$gt": 60
+          }
+      }
+  }
+}

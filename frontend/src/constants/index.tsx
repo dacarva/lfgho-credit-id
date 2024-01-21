@@ -32,3 +32,7 @@ export const contracts = {
 export const MIN_CREDIT_SCORE = 60;
 
 export const SPONSOR_FEE = "0.1";
+
+export const POLYGON_ID_URL = "https://self-hosted-demo-backend-platform.polygonid.me/api"
+
+export const POLYGON_ID_ISSUER = "did:polygonid:polygon:mumbai:2qH7TstpRRJHXNN4o49Fu9H2Qismku8hQeUxDVrjqT"
