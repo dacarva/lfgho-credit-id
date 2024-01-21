@@ -10,6 +10,7 @@ const BeneficiaryView: FunctionComponent = () => {
   const [installments, setInstallments] = useState(0);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
+  // @ts-ignore
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     switch (name) {
@@ -43,6 +44,7 @@ const BeneficiaryView: FunctionComponent = () => {
   };
 
   // Handle form submission
+  // @ts-ignore
   const handleSubmit = (event) => {
     event.preventDefault();
     // Here you can add what happens when the form is submitted

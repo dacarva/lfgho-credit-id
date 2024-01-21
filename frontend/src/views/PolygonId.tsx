@@ -1,5 +1,4 @@
-import { useWalletClient, useAccount } from "wagmi";
-import { WalletClient, Address, Chain } from "viem";
+import { useWalletClient } from "wagmi";
 
 import {
   LightSmartContractAccount,
@@ -16,7 +15,6 @@ const getAlchemyURL =
 
 const PolygonId = () => {
   const { data: walletClient } = useWalletClient();
-  const { isConnected, isDisconnected } = useAccount();
 
   const handleClick = async () => {
     console.log("Button clicked");
