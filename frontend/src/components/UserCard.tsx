@@ -40,7 +40,6 @@ const UserCard: FunctionComponent<UserCardType> = ({
         const fetchedEthPrice = await getEthPrice();
         setEthPrice(fetchedEthPrice);
         const { chain } = getNetwork();
-        console.log("🚀 ~ fetchData ~ chain:", chain);
 
         const AWETH = contracts[chain?.id as keyof typeof contracts].AWETH;
         const AGHODebt =

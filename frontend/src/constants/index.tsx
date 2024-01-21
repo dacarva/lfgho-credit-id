@@ -29,4 +29,6 @@ export const contracts = {
   },
 };
 
+export const MIN_CREDIT_SCORE = 60;
+
 export const SPONSOR_FEE = "0.1";
