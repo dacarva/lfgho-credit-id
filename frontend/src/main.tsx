@@ -3,7 +3,6 @@ import ReactDOM from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import App from "./App";
 import PolygonId from "./views/PolygonId";
-import TokenSender from "./components/TokenSender";
 import Home from "./views/Home";
 import Delegator from "./views/Delegator";
 import AlchemyAA from "./views/AlchemyAA";
@@ -54,10 +53,6 @@ const router = createBrowserRouter([
       {
         path: "/polygon-verifier",
         element: <PolygonId />,
-      },
-      {
-        path: "/token-sender",
-        element: <TokenSender />,
       },
     ],
   },

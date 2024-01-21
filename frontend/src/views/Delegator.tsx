@@ -34,7 +34,7 @@ const DelegatorView: FunctionComponent = () => {
       <section className="w-full my-0 mx-[!important] absolute top-[-80px] right-[0px] left-[0px] flex flex-col items-center justify-start pt-20 px-0 pb-[355px] box-border gap-[64px] max-w-full text-left text-29xl text-shades-white font-heading-05 mq450:gap-[16px] mq725:gap-[32px]">
         <div className="w-[1261px] flex flex-col items-start justify-start py-0 px-5 box-border gap-[72px] max-w-full mq450:gap-[18px] mq725:gap-[36px]">
           <CardsContainer />
-          <h1 className="m-0 relative text-inherit leading-[50px] text-[48px] font-medium font-inherit inline-block max-w-full z-[1] mq450:text-[29px] mq450:leading-[30px] mq975:text-19xl mq975:leading-[40px]">
+          <h1 className="m-0 relative text-inherit leading-[50px] text-[47px] font-medium font-inherit inline-block max-w-full z-[1] mq450:text-[29px] mq450:leading-[30px] mq975:text-19xl mq975:leading-[40px]">
             Credit applications
           </h1>
         </div>
