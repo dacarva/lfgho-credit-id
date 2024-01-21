@@ -1,4 +1,15 @@
-import { FunctionComponent } from "react";
+import { FunctionComponent, useEffect, useContext, useState } from "react";
+import { SmartWalletContext } from "@/context/smart-wallet";
+import {
+  fetchBalance,
+  readContracts,
+  getNetwork,
+  fetchToken,
+} from "@wagmi/core";
+import { getEthPrice } from "@/services/crypto";
+import { contracts } from "@/constants";
+import { Address } from "viem";
+import { erc20ABI } from "wagmi";
 
 type CardInformation = "Balance" | "Supplies" | "Borrows";
 
@@ -11,6 +22,74 @@ const UserCard: FunctionComponent<UserCardType> = ({
   title,
   cardInformation,
 }) => {
+  const { smartAccountAddress } = useContext(SmartWalletContext);
+  const [ethBalance, setEthBalance] = useState("");
+  const [ethPrice, setEthPrice] = useState(0);
+  const [ethSupplies, setEthSupplies] = useState(0);
+  const [GHODebt, setGHODebt] = useState(0);
+
+  useEffect(() => {
+    if (!smartAccountAddress) return;
+
+    const fetchData = async () => {
+      try {
+        const { formatted } = await fetchBalance({
+          address: smartAccountAddress,
+        });
+        setEthBalance(formatted.substring(0, 5));
+        const fetchedEthPrice = await getEthPrice();
+        setEthPrice(fetchedEthPrice);
+        const { chain } = getNetwork();
+        console.log("🚀 ~ fetchData ~ chain:", chain);
+
+        const AWETH = contracts[chain?.id as keyof typeof contracts].AWETH;
+        const AGHODebt =
+          contracts[chain?.id as keyof typeof contracts].GHO_VARIABLE_DEBT;
+        const { decimals: aWETHDecimals } = await fetchToken({
+          address: AWETH as Address,
+        });
+        const { decimals: AGHODebtDecimals } = await fetchToken({
+          address: AGHODebt as Address,
+        });
+
+        const aWETHContract = {
+          address: AWETH as Address,
+          abi: erc20ABI,
+        };
+        const aGHODebtContract = {
+          address: AWETH as Address,
+          abi: erc20ABI,
+        };
+
+        const tokensData = await readContracts({
+          contracts: [
+            {
+              ...aWETHContract,
+              functionName: "balanceOf",
+              args: [smartAccountAddress],
+            },
+            {
+              ...aGHODebtContract,
+              functionName: "balanceOf",
+              args: [smartAccountAddress],
+            },
+          ],
+        });
+
+        setEthSupplies(Number(tokensData[0].result) / 10 ** aWETHDecimals);
+        setGHODebt(Number(tokensData[1].result) / 10 ** AGHODebtDecimals);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+    const intervalId = setInterval(fetchData, 3000);
+
+    // Clear the interval when the component unmounts
+    return () => clearInterval(intervalId);
+  }, [smartAccountAddress]);
+
   return (
     <div className="flex-[0.895] rounded-2xl bg-neutral-800 flex flex-col items-start justify-start py-6 pr-[60px] pl-6 box-border gap-[24px] min-w-[293px] min-h-[182px] max-w-full text-left text-13xl text-primary-2 font-heading-03 mq450:pr-5 mq450:box-border mq450:flex-1 mq1025:min-h-[auto]">
       <div className="flex flex-col items-center justify-start">
@@ -35,20 +114,22 @@ const UserCard: FunctionComponent<UserCardType> = ({
       <div className="self-stretch flex flex-row items-center justify-between gap-[20px] text-lg text-neutral-200 font-body-2 mq450:flex-wrap">
         {cardInformation === "Balance" && (
           <div className="relative tracking-[0.5px] leading-[26px]">
-            <p className="m-0">{` $0,00 ETH `}</p>
-            <p className="m-0">Red Sepolia</p>
+            <p className="m-0">{ethBalance} ETH</p>
+            <p className="m-0">
+              $ {(Number(ethBalance) * ethPrice).toFixed(2)}
+            </p>
           </div>
         )}
         {cardInformation === "Supplies" && (
           <div className="relative tracking-[0.5px] leading-[26px]">
-            <p className="m-0">{` $0,00 ETH `}</p>
-            <p className="m-0">Red Supplies</p>
+            <p className="m-0">{ethSupplies.toFixed(2)} ETH</p>
+            <p className="m-0">$ {(ethSupplies * ethPrice).toFixed(2)}</p>
           </div>
         )}
         {cardInformation === "Borrows" && (
           <div className="relative tracking-[0.5px] leading-[26px]">
-            <p className="m-0">{` $0,00 ETH `}</p>
-            <p className="m-0">Red Borrows</p>
+            <p className="m-0">{GHODebt.toFixed(2)} GHO</p>
+            <p className="m-0">$ {GHODebt.toFixed(2)}</p>
           </div>
         )}
         {cardInformation === "Balance" && (
