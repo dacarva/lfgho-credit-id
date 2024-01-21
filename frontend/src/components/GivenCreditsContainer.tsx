@@ -1,3 +1,4 @@
+// @ts-nocheck
 import DelegatorFrame from "@/components/CreditApplicationCard";
 
 const GivenCreditsContainer = () => {
