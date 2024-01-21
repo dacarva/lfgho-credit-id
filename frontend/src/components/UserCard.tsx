@@ -10,6 +10,8 @@ import { getEthPrice } from "@/services/crypto";
 import { contracts } from "@/constants";
 import { Address } from "viem";
 import { erc20ABI } from "wagmi";
+import { depositETH } from "@/services";
+import toast from "react-hot-toast";
 
 type CardInformation = "Balance" | "Supplies" | "Borrows";
 
@@ -22,11 +24,12 @@ const UserCard: FunctionComponent<UserCardType> = ({
   title,
   cardInformation,
 }) => {
-  const { smartAccountAddress } = useContext(SmartWalletContext);
+  const { smartAccountAddress, smartAccount } = useContext(SmartWalletContext);
   const [ethBalance, setEthBalance] = useState("");
   const [ethPrice, setEthPrice] = useState(0);
   const [ethSupplies, setEthSupplies] = useState(0);
   const [GHODebt, setGHODebt] = useState(0);
+  const [depositAmount, setDepositAmount] = useState("");
 
   useEffect(() => {
     if (!smartAccountAddress) return;
@@ -89,6 +92,42 @@ const UserCard: FunctionComponent<UserCardType> = ({
     return () => clearInterval(intervalId);
   }, [smartAccountAddress]);
 
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDepositAmount(e.target.value);
+  };
+
+  const handleDeposit = async () => {
+    console.log("Depositing amount: ", depositAmount);
+    if (!smartAccount) {
+      toast.error("Smart account not found");
+      throw new Error("Smart account not found");
+    }
+    const { chain } = getNetwork();
+
+    try {
+      const WETH_GATEWAY = contracts[chain?.id as keyof typeof contracts]
+        .WETH_GATEWAY as Address;
+      const LENDING_POOL = contracts[chain?.id as keyof typeof contracts]
+        .LENDING_POOL as Address;
+
+      await toast.promise(
+        depositETH(smartAccount, WETH_GATEWAY, LENDING_POOL, depositAmount),
+        {
+          loading: "Depositing in lending pool",
+          success: (data) => {
+            // Format the success message using data (transactionDetails)
+            const successMessage = `Deposit successfull! Transaction Hash: ${data}`;
+            console.log(`Deposit successful! Transaction Hash: ${data}`);
+            return successMessage;
+          },
+          error: "Failed to deposit",
+        }
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="flex-[0.895] rounded-2xl bg-neutral-800 flex flex-col items-start justify-start py-6 pr-[60px] pl-6 box-border gap-[24px] min-w-[293px] min-h-[182px] max-w-full text-left text-13xl text-primary-2 font-heading-03 mq450:pr-5 mq450:box-border mq450:flex-1 mq1025:min-h-[auto]">
       <div className="flex flex-col items-center justify-start">
@@ -132,13 +171,26 @@ const UserCard: FunctionComponent<UserCardType> = ({
           </div>
         )}
         {cardInformation === "Balance" && (
-          <button className="cursor-pointer py-0 px-[22px] bg-[transparent] rounded-31xl box-border w-[123px] flex flex-row items-center justify-center border-[2px] border-solid border-primary">
-            <div className="flex flex-row items-center justify-start py-4 px-0 gap-[8px]">
-              <div className="relative text-xl tracking-[0.15px] leading-[28px] font-medium font-body-2 text-shades-white text-center mq450:text-base mq450:leading-[22px]">
-                Deposit
+          <div className="flex flex-col items-center justify-start gap-[16px]">
+            <input
+              className="relative w-[80px] h-[28px] bg-transparent border-[2px] border-solid border-primary text-shades-white text-center"
+              type="number"
+              placeholder="Amount"
+              id="depositAmount"
+              value={depositAmount}
+              onChange={handleAmountChange}
+            />
+            <button
+              onClick={handleDeposit}
+              className="cursor-pointer py-0 px-[22px] bg-[transparent] rounded-31xl box-border w-[123px] flex flex-row items-center justify-center border-[2px] border-solid border-primary"
+            >
+              <div className="flex flex-row items-center justify-start py-4 px-0 gap-[8px]">
+                <div className="relative text-xl tracking-[0.15px] leading-[28px] font-medium font-body-2 text-shades-white text-center mq450:text-base mq450:leading-[22px]">
+                  Deposit
+                </div>
               </div>
-            </div>
-          </button>
+            </button>
+          </div>
         )}
       </div>
     </div>

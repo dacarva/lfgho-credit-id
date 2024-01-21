@@ -1,16 +1,9 @@
-import {
-  FunctionComponent,
-  useMemo,
-  useContext,
-  type CSSProperties,
-} from "react";
+import { FunctionComponent, useMemo, type CSSProperties } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { Delegation } from "@/services/delegations";
 import { Address } from "viem";
-import { MIN_CREDIT_SCORE, contracts } from "@/constants";
-import { delegateCollateral } from "@/services";
-import { SmartWalletContext } from "@/context/smart-wallet";
-import { getNetwork } from "@wagmi/core";
-import toast from "react-hot-toast";
+import { MIN_CREDIT_SCORE } from "@/constants";
 
 const formatAddress = (address: Address) => {
   if (!address) return "0x smart";
@@ -25,7 +18,7 @@ const CreditApplicationCard: FunctionComponent<Delegation> = ({
   creditScore,
   idVerified,
 }) => {
-  const { smartAccount } = useContext(SmartWalletContext);
+  const navigate = useNavigate();
 
   const frameGroupStyle: CSSProperties = useMemo(() => {
     return {
@@ -33,41 +26,15 @@ const CreditApplicationCard: FunctionComponent<Delegation> = ({
     };
   }, [creditScore]);
 
-  const handleDelegateCollateral = async () => {
-    console.log("handleDelegateCollateral");
-    if (!smartAccount) {
-      toast.error("Smart account not found");
-      throw new Error("Smart account not found");
-    }
-    const { chain } = getNetwork();
-    const GHO_VARIABLE_DEBT = contracts[chain?.id as keyof typeof contracts]
-      .GHO_VARIABLE_DEBT as Address;
-    const LENDING_POOL = contracts[chain?.id as keyof typeof contracts]
-      .LENDING_POOL as Address;
-    try {
-      toast.promise(
-        delegateCollateral(
-          smartAccount,
-          LENDING_POOL,
-          GHO_VARIABLE_DEBT,
-          address,
-          creditAmount.toString()
-        ),
-        {
-          loading: "Delegating collateral...",
-          success: (data) => {
-            // Format the success message using data (transactionDetails)
-            const successMessage = `Collateral Delegated: ${data}`;
-            console.log(`Collateral Delegated: ${data}`);
-            return successMessage;
-          },
-          error: "Failed to send tokens",
-        }
-      );
-    } catch (error) {
-      console.error(error);
-    }
+  const handleContractSign = async () => {
+    navigate("/contract-sign", {
+      state: {
+        address,
+        creditAmount,
+      },
+    });
   };
+
   return (
     <div className="w-72 rounded-2xl bg-secondary shrink-0 flex flex-col items-center justify-start py-8 px-[31px] box-border gap-[32px] text-left text-base text-neutral-400 font-body-2 mq450:pt-[21px] mq450:pb-[21px] mq450:box-border">
       <div className="flex flex-col items-start justify-start gap-[24px]">
@@ -133,7 +100,7 @@ const CreditApplicationCard: FunctionComponent<Delegation> = ({
       </div>
       {creditScore >= MIN_CREDIT_SCORE && (
         <button
-          onClick={handleDelegateCollateral}
+          onClick={handleContractSign}
           className="cursor-pointer [border:none] py-0 px-6 bg-primary rounded-31xl flex flex-row items-center justify-center"
         >
           <div className="flex flex-row items-center justify-start py-4 pr-[23px] pl-[22px] gap-[8px]">

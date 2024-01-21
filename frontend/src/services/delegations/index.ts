@@ -7,6 +7,15 @@ export type Delegation = {
   creditScore: number;
 };
 
+export type ContractSignature = {
+  contractId: string;
+  delegatorAddress: Address;
+  beneficiaryAddress: Address;
+  creditAmount: number;
+  status: "pending" | "signed" | "rejected";
+  timestamp: number;
+};
+
 const mockDelegations: Delegation[] = [
   {
     address: "0x0EB097a04512D4F4bD9CfA18D9F03B27173D0615",
@@ -21,7 +30,7 @@ const mockDelegations: Delegation[] = [
     creditScore: 80,
   },
   {
-    address: "0x47c801BFA88cEf12AC668d8C51456aD7dAfd9fF5",
+    address: "0x0EB097a04512D4F4bD9CfA18D9F03B27173D0615",
     creditAmount: 15,
     idVerified: false,
     creditScore: 70,
@@ -31,6 +40,33 @@ const mockDelegations: Delegation[] = [
     creditAmount: 1500,
     idVerified: false,
     creditScore: 40,
+  },
+];
+
+const mockContratSignatures: ContractSignature[] = [
+  {
+    contractId: "0x0EB097a04512D4F4bD9CfA18D9F03B27173D0615",
+    delegatorAddress: "0xAa1933907E260AF2fAA23B2Bf65eE29C909045e3",
+    beneficiaryAddress: "0x0EB097a04512D4F4bD9CfA18D9F03B27173D0615",
+    creditAmount: 15,
+    status: "signed",
+    timestamp: Date.now(),
+  },
+  {
+    contractId: "0x0EB097a04512D4F4bD9CfA18D9F03B27173D0615",
+    delegatorAddress: "0xAa1933907E260AF2fAA23B2Bf65eE29C909045e3",
+    beneficiaryAddress: "0x0EB097a04512D4F4bD9CfA18D9F03B27173D0615",
+    creditAmount: 10,
+    status: "signed",
+    timestamp: Date.now(),
+  },
+  {
+    contractId: "0x0EB097a04512D4F4bD9CfA18D9F03B27173D0615",
+    delegatorAddress: "0xAa1933907E260AF2fAA23B2Bf65eE29C909045e3",
+    beneficiaryAddress: "0x0EB097a04512D4F4bD9CfA18D9F03B27173D0615",
+    creditAmount: 1,
+    status: "signed",
+    timestamp: Date.now(),
   },
 ];
 
@@ -48,5 +84,49 @@ export const userDelegations = async (
   } catch (error) {
     console.error(error);
     throw new Error("Error occurred during fetching delegations");
+  }
+};
+
+export const signContract = async (
+  delegatorAddress: Address,
+  beneficiaryAddress: Address,
+  creditAmount: number
+): Promise<ContractSignature> => {
+  try {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          contractId: "0x0EB097a04512D4F4bD9CfA18D9F03B27173D0615",
+          delegatorAddress,
+          beneficiaryAddress,
+          creditAmount,
+          status: "signed",
+          timestamp: Date.now(),
+        });
+      }, 2000);
+    });
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error occurred during signing contract");
+  }
+};
+
+export const contractSignatures = async (
+  beneficiaryAddress: Address
+): Promise<ContractSignature[]> => {
+  try {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const filteredSignatures = mockContratSignatures.filter(
+          (signature) =>
+            signature.beneficiaryAddress.toLowerCase() ===
+            beneficiaryAddress.toLowerCase()
+        );
+        resolve(filteredSignatures);
+      }, 2000);
+    });
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error occurred during fetching contract signatures");
   }
 };

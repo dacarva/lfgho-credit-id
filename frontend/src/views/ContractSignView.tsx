@@ -1,8 +1,92 @@
-import { FunctionComponent } from "react";
+import { FunctionComponent, useContext, useState } from "react";
+import { useLocation } from "react-router-dom";
+import {
+  signContract,
+  ContractSignature,
+  delegateCollateral,
+} from "@/services";
+import toast from "react-hot-toast";
+import { SmartWalletContext } from "@/context/smart-wallet";
+import { Address } from "viem";
+import { getNetwork } from "@wagmi/core";
+import { contracts } from "@/constants";
 
 const ContractSignView: FunctionComponent = () => {
-  const handleContractSign = () => {
-    console.log("first button clicked");
+  const location = useLocation();
+  const { smartAccountAddress, smartAccount } = useContext(SmartWalletContext);
+  const [isContractSigned, setIsContractSigned] = useState(false);
+
+  const params = location.state;
+
+  const handleDelegateCollateral = async () => {
+    console.log("handleDelegateCollateral");
+    if (!smartAccount) {
+      toast.error("Smart account not found");
+      throw new Error("Smart account not found");
+    }
+    const { chain } = getNetwork();
+    const GHO_VARIABLE_DEBT = contracts[chain?.id as keyof typeof contracts]
+      .GHO_VARIABLE_DEBT as Address;
+    const LENDING_POOL = contracts[chain?.id as keyof typeof contracts]
+      .LENDING_POOL as Address;
+    try {
+      toast.promise(
+        delegateCollateral(
+          smartAccount,
+          LENDING_POOL,
+          GHO_VARIABLE_DEBT,
+          params.address,
+          params.creditAmount.toString()
+        ),
+        {
+          loading: "Delegating collateral...",
+          success: (data) => {
+            // Format the success message using data (transactionDetails)
+            const successMessage = `Collateral Delegated: ${data}`;
+            console.log(`Collateral Delegated: ${data}`);
+            return successMessage;
+          },
+          error: "Failed to delegate collateral",
+        }
+      );
+    } catch (error) {
+      console.error(error);
+      throw new Error("Failed to delegate collateral");
+    }
+  };
+
+  const handleContractSign = async () => {
+    console.log("Received params", params);
+
+    try {
+      const contractSignature = await toast.promise(
+        signContract(
+          smartAccountAddress as Address,
+          params.address as Address,
+          params.creditAmount as number
+        ),
+        {
+          loading: "Signing contract...",
+          success: (data) => {
+            // Format the success message using data (transactionDetails)
+            const successMessage = `Contract signed: at timestamp ${
+              (data as ContractSignature)?.timestamp || ""
+            }`;
+            console.log(`Contract signed:`, data);
+            return successMessage;
+          },
+          error: "Failed to sign contract",
+        }
+      );
+      console.log(
+        "🚀 ~ handleContractSign ~ contractSignature:",
+        contractSignature
+      );
+      await handleDelegateCollateral();
+      setIsContractSigned(true);
+    } catch (error) {
+      console.error(error);
+    }
   };
   return (
     <div className="w-full relative  overflow-hidden flex flex-col items-start justify-start gap-[43px] tracking-[normal] mq725:gap-[21px]">
@@ -37,7 +121,7 @@ const ContractSignView: FunctionComponent = () => {
                       your are close to delegate a credit to
                     </div>
                     <div className="relative tracking-[0.25px] leading-[32px] font-medium text-neutral-200 z-[1] mq450:text-lgi mq450:leading-[26px]">
-                      0x455n566...
+                      {params.address}
                     </div>
                   </div>
                 </div>
@@ -73,26 +157,20 @@ const ContractSignView: FunctionComponent = () => {
               turpis odio, eleifend porttitor finibus nec, lobortis et nulla.
             </p>
           </div>
-          <button
-            onClick={handleContractSign}
-            className="cursor-pointer [border:none] py-0 px-6 bg-primary w-[287px] rounded-31xl flex flex-row items-center justify-center box-border"
-          >
-            <div className="flex flex-row items-center justify-start py-4 px-0 gap-[8px]">
-              <div className="relative text-xl tracking-[0.15px] leading-[28px] font-medium font-body-2 text-shades-white text-center whitespace-nowrap">
-                Sign contract
+          {!isContractSigned && (
+            <button
+              onClick={handleContractSign}
+              className="cursor-pointer [border:none] py-0 px-6 bg-primary w-[287px] rounded-31xl flex flex-row items-center justify-center box-border"
+            >
+              <div className="flex flex-row items-center justify-start py-4 px-0 gap-[8px]">
+                <div className="relative text-xl tracking-[0.15px] leading-[28px] font-medium font-body-2 text-shades-white text-center whitespace-nowrap">
+                  Sign contract
+                </div>
               </div>
-            </div>
-          </button>
+            </button>
+          )}
         </div>
       </main>
-      <footer className="self-stretch bg-neutral-800 flex flex-col items-center justify-start p-12 gap-[16px] text-left text-xl text-neutral-300 font-body-2">
-        <div className="relative tracking-[0.15px] leading-[28px] font-medium mq450:text-base mq450:leading-[22px]">
-          Logotype
-        </div>
-        <div className="relative text-base tracking-[0.25px] leading-[24px]">
-          ETHGlobal 2024
-        </div>
-      </footer>
     </div>
   );
 };

@@ -6,6 +6,7 @@ import { wagmiConfig } from "@/config";
 import { Toaster } from "react-hot-toast";
 // import Navbar from "@/components/NavBar";
 import Navbar from "@/components/NavBarNew";
+import Footer from "@/components/Footer";
 import { Outlet } from "react-router-dom";
 
 function App() {
@@ -19,9 +20,10 @@ function App() {
               <div className="fixed top-0 left-0 right-0 z-10">
                 <Navbar />
               </div>
-              <div className="mt-[140px]">
+              <div className="mt-[140px] mb-[140px]">
                 <Outlet />
               </div>
+              <Footer />
             </>
           </SmartWalletProvider>
         </ConnectKitProvider>
